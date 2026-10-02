@@ -186,6 +186,14 @@
   #settings .item.rigged button.rig { color: var(--red); }
   #settings button.del { background: transparent; color: #555; }
   #settings button.del:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
+  #settings .keys { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; color: #999; font-size: 12px; }
+  #settings .keys > span:nth-child(odd) { color: #ccc; white-space: nowrap; }
+  #settings kbd {
+    display: inline-block; min-width: 20px; padding: 2px 6px;
+    border-radius: 6px; border: 1px solid #333; border-bottom-width: 2px;
+    background: #1a1a1a; color: #fff;
+    font: 800 11px "Montserrat", sans-serif; text-align: center;
+  }
   #settings footer {
     display: flex; gap: 8px; align-items: center; justify-content: flex-end;
     padding: 14px 20px;
@@ -253,6 +261,18 @@
       <section>
         <h3>Label under the winner</h3>
         <input type="text" id="setPill" spellcheck="false" maxlength="40">
+      </section>
+      <section>
+        <h3>Shortcuts</h3>
+        <div class="keys">
+          <span><kbd>Space</kbd> / click</span><span>Spin</span>
+          <span><kbd>1</kbd>–<kbd>9</kbd></span><span>Force the next spin onto item #1–9 (secret, one spin only)</span>
+          <span><kbd>R</kbd></span><span>Reset</span>
+          <span><kbd>F</kbd></span><span>Fullscreen</span>
+          <span><kbd>G</kbd></span><span>Green screen for keying</span>
+          <span><kbd>M</kbd></span><span>Sound on / off</span>
+          <span><kbd>E</kbd></span><span>Settings</span>
+        </div>
       </section>
     </div>
     <footer>
