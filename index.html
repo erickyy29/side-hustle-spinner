@@ -159,6 +159,9 @@
   #settings button.primary { background: var(--red); color: #fff; box-shadow: 0 0 18px rgba(255, 42, 42, .35); }
   #settings button.primary:hover { background: #ff4545; }
   #settings button.icon { padding: 0; width: 30px; height: 30px; font-size: 15px; letter-spacing: 0; }
+  #settings .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  #settings button.del { background: transparent; color: #555; }
+  #settings button.del:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
   #settings footer {
     display: flex; gap: 8px; align-items: center; justify-content: flex-end;
     padding: 14px 20px;
@@ -215,6 +218,9 @@
         <h3>Spinner items</h3>
         <div class="cols"><span></span><span>Name</span><span>Odds</span><span>Chance</span><span></span></div>
         <div id="setItems"></div>
+        <div class="tools">
+          <button id="setAdd">+ Add item</button>
+        </div>
       </section>
     </div>
     <footer>
@@ -636,16 +642,41 @@
         <input type="text" class="name" spellcheck="false" maxlength="40">
         <label class="pct"><input type="number" class="weight" min="0" max="100" step="1"></label>
         <span class="chance"></span>
-        <span></span>`;
+        <button class="icon del" title="Remove">✕</button>`;
       const name = row.querySelector(".name");
       const weight = row.querySelector(".weight");
       name.value = it.name;
       weight.value = it.weight;
       name.addEventListener("input", () => { it.name = name.value; });
       weight.addEventListener("input", () => { it.weight = weight.value; refreshChances(); });
+      row.querySelector(".del").addEventListener("click", () => {
+        if (draft.length <= 1) return;
+        const keepEqual = draftIsEqual();
+        draft.splice(i, 1);
+        if (keepEqual) equalizeDraft();
+        renderSettings();
+      });
       setItems.appendChild(row);
     });
     refreshChances();
+  }
+
+  function draftIsEqual() {
+    return draft.every(it => Math.abs((Number(it.weight) || 0) - (Number(draft[0].weight) || 0)) < 0.01);
+  }
+
+  function equalizeDraft() {
+    const w = Math.round(1000 / draft.length) / 10;
+    draft.forEach(it => { it.weight = w; });
+  }
+
+  function addDraftItem() {
+    const keepEqual = draftIsEqual();
+    draft.push({ name: "", weight: 0 });
+    if (keepEqual) equalizeDraft();
+    renderSettings();
+    const inputs = setItems.querySelectorAll(".name");
+    inputs[inputs.length - 1].focus();
   }
 
   function openSettings() {
@@ -676,6 +707,7 @@
     closeSettings();
   }
 
+  document.getElementById("setAdd").addEventListener("click", addDraftItem);
   document.getElementById("setSave").addEventListener("click", saveSettings);
   document.getElementById("setCancel").addEventListener("click", closeSettings);
   document.getElementById("setClose").addEventListener("click", closeSettings);
