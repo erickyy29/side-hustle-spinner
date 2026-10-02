@@ -126,7 +126,7 @@
   #settings section + section { margin-top: 18px; }
   #settings h3 { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #888; margin-bottom: 8px; }
   #settings .cols, #settings .item {
-    display: grid; grid-template-columns: 22px 1fr 84px 52px 30px; gap: 8px; align-items: center;
+    display: grid; grid-template-columns: 22px 1fr 84px 52px 30px 30px; gap: 8px; align-items: center;
   }
   #settings .cols { color: #666; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 0 2px 6px; }
   #settings .item { padding: 4px 2px; border-radius: 10px; }
@@ -163,6 +163,10 @@
   #settings .total { margin-left: auto; font-size: 11px; color: #888; font-variant-numeric: tabular-nums; }
   #settings .total b { color: #fff; }
   #settings .total.off b { color: #ffb020; }
+  #settings button.rig { background: transparent; color: #555; font-size: 14px; }
+  #settings button.rig:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
+  #settings .item.rigged { background: rgba(255, 42, 42, .08); }
+  #settings .item.rigged button.rig { color: var(--red); }
   #settings button.del { background: transparent; color: #555; }
   #settings button.del:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
   #settings footer {
@@ -219,7 +223,7 @@
     <div class="body">
       <section>
         <h3>Spinner items</h3>
-        <div class="cols"><span></span><span>Name</span><span>Odds</span><span>Chance</span><span></span></div>
+        <div class="cols"><span></span><span>Name</span><span>Odds</span><span>Chance</span><span></span><span></span></div>
         <div id="setItems"></div>
         <div class="tools">
           <button id="setAdd">+ Add item</button>
@@ -634,6 +638,7 @@
       el.textContent = (c >= 99.95 ? "100" : c.toFixed(c < 10 ? 1 : 0)) + "%";
       el.classList.toggle("hot", c >= 99.95);
       el.classList.toggle("zero", c === 0);
+      row.classList.toggle("rigged", c >= 99.95 && draft.length > 1);
     });
 
     const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
@@ -654,6 +659,7 @@
         <input type="text" class="name" spellcheck="false" maxlength="40">
         <label class="pct"><input type="number" class="weight" min="0" max="100" step="1"></label>
         <span class="chance"></span>
+        <button class="icon rig" title="Always land here (100%)">◎</button>
         <button class="icon del" title="Remove">✕</button>`;
       const name = row.querySelector(".name");
       const weight = row.querySelector(".weight");
@@ -661,6 +667,10 @@
       weight.value = it.weight;
       name.addEventListener("input", () => { it.name = name.value; });
       weight.addEventListener("input", () => { it.weight = weight.value; refreshChances(); });
+      row.querySelector(".rig").addEventListener("click", () => {
+        draft.forEach((d, j) => { d.weight = j === i ? 100 : 0; });
+        renderSettings();
+      });
       row.querySelector(".del").addEventListener("click", () => {
         if (draft.length <= 1) return;
         const keepEqual = draftIsEqual();
