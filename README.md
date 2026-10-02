@@ -1,6 +1,6 @@
-# wheel-spinner
+# Side Hustle Spinner
 
-"Random side hustle" slot reel, a single `index.html` you can film off a laptop screen for short-form video.
+A "random side hustle" slot reel for UGC and short-form video: a single `index.html` you can film off a laptop screen for short-form video.
 
 Open `index.html` in Chrome.
 
