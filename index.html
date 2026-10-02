@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Side Hustle Reel</title>
+<title>Side Hustle Spinner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&display=block" rel="stylesheet">
@@ -91,41 +91,124 @@
   }
   #pill.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
 
-  /* List editor (E) */
-  #editor {
+  /* Gear: only shows while the mouse is moving, so it never ends up on camera */
+  #gear {
+    position: fixed; top: 16px; right: 16px; z-index: 15;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(255, 255, 255, .08); color: #fff;
+    border: 1px solid rgba(255, 255, 255, .12);
+    backdrop-filter: blur(8px);
+    font-size: 20px; line-height: 1;
+    cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease, background .15s;
+  }
+  #gear:hover { background: rgba(255, 42, 42, .35); }
+  body.mouse #gear { opacity: 1; pointer-events: auto; }
+  body.mouse { cursor: default; }
+
+  /* Settings panel (E) */
+  #settings {
     position: fixed; inset: 0;
     display: none; align-items: center; justify-content: center;
-    background: rgba(0, 0, 0, .7);
+    padding: 16px;
+    background: rgba(0, 0, 0, .72);
+    backdrop-filter: blur(6px);
     cursor: auto;
-    z-index: 10;
+    z-index: 20;
   }
-  #editor.open { display: flex; }
-  #editor .box {
-    width: min(420px, calc(100vw - 32px));
-    background: #161616;
-    border: 1px solid #2a2a2a;
-    border-radius: 14px;
-    padding: 18px;
+  #settings.open { display: flex; }
+  #settings .panel {
+    width: min(600px, 100%);
+    max-height: calc(100vh - 32px);
+    display: flex; flex-direction: column;
+    background: #121212;
+    border: 1px solid #262626;
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 42, 42, .06);
     color: #ddd;
     font: 600 13px/1.4 "Montserrat", system-ui, sans-serif;
     user-select: text;
+    overflow: hidden;
   }
-  #editor textarea {
-    width: 100%; height: 280px; margin: 10px 0 12px;
-    background: #0d0d0d; color: #fff;
-    border: 1px solid #333; border-radius: 8px;
-    padding: 10px; resize: vertical;
-    font: 800 14px/1.6 "Montserrat", system-ui, sans-serif;
-    text-transform: uppercase; letter-spacing: .04em;
+  #settings header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #1f1f1f;
   }
-  #editor .actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
-  #editor .hint { margin-right: auto; color: #777; font-size: 11px; }
-  #editor button {
-    font: 800 12px "Montserrat", sans-serif; letter-spacing: .06em;
-    padding: 8px 14px; border-radius: 999px; border: 0; cursor: pointer;
+  #settings h2 { font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+  #settings .sub { color: #777; font-size: 11px; font-weight: 600; margin-top: 2px; letter-spacing: 0; text-transform: none; }
+  #settings .body { padding: 14px 20px; overflow-y: auto; }
+  #settings section + section { margin-top: 18px; }
+  #settings h3 { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+  #settings .cols, #settings .item {
+    display: grid; grid-template-columns: 22px 1fr 84px 52px 30px 30px; gap: 8px; align-items: center;
   }
-  #editor .save { background: var(--red); color: #fff; }
-  #editor .cancel { background: #2a2a2a; color: #ccc; }
+  #settings .cols { color: #666; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 0 2px 6px; }
+  #settings .item { padding: 4px 2px; border-radius: 10px; }
+  #settings .item:hover { background: #181818; }
+  #settings .num { color: #555; font-size: 11px; text-align: right; }
+  #settings input[type=text], #settings input[type=number] {
+    width: 100%; min-width: 0;
+    background: #0b0b0b; color: #fff;
+    border: 1px solid #2c2c2c; border-radius: 8px;
+    padding: 8px 10px;
+    font: 800 13px "Montserrat", system-ui, sans-serif;
+    letter-spacing: .04em;
+    outline: none;
+  }
+  #settings input[type=text] { text-transform: uppercase; }
+  #settings input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255, 42, 42, .18); }
+  #settings .pct { position: relative; }
+  #settings .pct input { padding-right: 22px; text-align: right; }
+  #settings .pct::after { content: "%"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: #666; font-size: 12px; }
+  #settings .chance { font-size: 11px; color: #999; text-align: right; font-variant-numeric: tabular-nums; }
+  #settings .chance.hot { color: var(--red); }
+  #settings .chance.zero { color: #444; }
+  #settings button {
+    font: 800 11px "Montserrat", sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    padding: 9px 14px; border-radius: 999px; border: 0; cursor: pointer;
+    background: #232323; color: #ccc;
+    transition: background .15s, color .15s;
+  }
+  #settings button:hover { background: #2e2e2e; color: #fff; }
+  #settings button.primary { background: var(--red); color: #fff; box-shadow: 0 0 18px rgba(255, 42, 42, .35); }
+  #settings button.primary:hover { background: #ff4545; }
+  #settings button.icon { padding: 0; width: 30px; height: 30px; font-size: 15px; letter-spacing: 0; }
+  #settings .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  #settings .total { margin-left: auto; font-size: 11px; color: #888; font-variant-numeric: tabular-nums; }
+  #settings .total b { color: #fff; }
+  #settings .total.off b { color: #ffb020; }
+  #settings button.rig { background: transparent; color: #555; font-size: 14px; }
+  #settings button.rig:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
+  #settings .item.rigged { background: rgba(255, 42, 42, .08); }
+  #settings .item.rigged button.rig { color: var(--red); }
+  #settings button.del { background: transparent; color: #555; }
+  #settings button.del:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
+  #settings .keys { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; color: #999; font-size: 12px; }
+  #settings .keys > span:nth-child(odd) { color: #ccc; white-space: nowrap; }
+  #settings kbd {
+    display: inline-block; min-width: 20px; padding: 2px 6px;
+    border-radius: 6px; border: 1px solid #333; border-bottom-width: 2px;
+    background: #1a1a1a; color: #fff;
+    font: 800 11px "Montserrat", sans-serif; text-align: center;
+  }
+  #settings footer {
+    display: flex; gap: 8px; align-items: center; justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid #1f1f1f;
+  }
+  #settings footer .spacer { margin-right: auto; }
+  @media (max-width: 520px) {
+    #settings .panel { border-radius: 14px; }
+    #settings header, #settings .body, #settings footer { padding-left: 14px; padding-right: 14px; }
+    #settings .cols, #settings .item { grid-template-columns: 1fr 66px 38px 26px 26px; gap: 6px; }
+    #settings .cols > span:first-child, #settings .num { display: none; }
+    #settings input[type=text], #settings input[type=number] { padding: 8px; font-size: 12px; }
+    #settings button.icon { width: 26px; height: 26px; }
+    #settings footer button { padding: 9px 11px; }
+  }
 
   #measure {
     position: absolute; visibility: hidden; white-space: nowrap;
@@ -162,15 +245,55 @@
   </filter>
 </svg>
 
-<div id="editor">
-  <div class="box">
-    <div>Edit list — one item per line</div>
-    <textarea id="editorText" spellcheck="false"></textarea>
-    <div class="actions">
-      <span class="hint">⌘/Ctrl+Enter save · Esc cancel</span>
-      <button class="cancel" id="editorCancel">Cancel</button>
-      <button class="save" id="editorSave">Save</button>
+<button id="gear" title="Settings (E)" aria-label="Settings">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+</button>
+
+<div id="settings" role="dialog" aria-label="Settings">
+  <div class="panel">
+    <header>
+      <div>
+        <h2>Settings</h2>
+        <div class="sub">Edit the names and the odds of landing on each one.</div>
+      </div>
+      <button class="icon" id="setClose" title="Close (Esc)">✕</button>
+    </header>
+    <div class="body">
+      <section>
+        <h3>Spinner items</h3>
+        <div class="cols"><span></span><span>Name</span><span>Odds</span><span>Chance</span><span></span><span></span></div>
+        <div id="setItems"></div>
+        <div class="tools">
+          <button id="setAdd">+ Add item</button>
+          <button id="setEqual" title="Give every item the same chance">Equal odds</button>
+          <span class="total" id="setTotal"></span>
+        </div>
+      </section>
+      <section>
+        <h3>Label under the winner</h3>
+        <input type="text" id="setPill" spellcheck="false" maxlength="40">
+      </section>
+      <section>
+        <h3>Shortcuts</h3>
+        <div class="keys">
+          <span><kbd>Space</kbd> / click</span><span>Spin</span>
+          <span><kbd>1</kbd>–<kbd>9</kbd></span><span>Force the next spin onto item #1–9 (secret, one spin only)</span>
+          <span><kbd>R</kbd></span><span>Reset</span>
+          <span><kbd>F</kbd></span><span>Fullscreen</span>
+          <span><kbd>G</kbd></span><span>Green screen for keying</span>
+          <span><kbd>M</kbd></span><span>Sound on / off</span>
+          <span><kbd>E</kbd></span><span>Settings</span>
+        </div>
+      </section>
     </div>
+    <footer>
+      <button class="spacer" id="setDefaults" title="Back to the built-in list with equal odds">Reset to defaults</button>
+      <button id="setCancel">Cancel</button>
+      <button class="primary" id="setSave">Save</button>
+    </footer>
   </div>
 </div>
 
@@ -186,10 +309,12 @@
   const DRUM_STEP = 21;      // degrees between rows on the drum
   const SLOTS = 4;           // rows rendered above/below center
 
-  const STORE_KEY = "side-hustle-reel:list";
+  const STORE_KEY = "side-hustle-spinner:settings";
+  const LEGACY_KEY = "side-hustle-reel:list";
 
   // ── State ─────────────────────────────────────────────────────────────────
-  let items = loadItems();
+  let items = loadItems();   // [{ name, weight }] — weight is a % chance
+  let pillText = loadPillText();
   let pos = 0;               // continuous reel position, in rows
   let mode = "idle";         // idle | spin | bounce | landed
   let spin = null;           // { start, p0, dist }
@@ -205,9 +330,9 @@
   const pill = document.getElementById("pill");
   const blurStd = document.getElementById("mblurStd");
   const measure = document.getElementById("measure");
-  const editor = document.getElementById("editor");
-  const editorText = document.getElementById("editorText");
-  pill.textContent = PILL_TEXT;
+  const settings = document.getElementById("settings");
+  const setItems = document.getElementById("setItems");
+  pill.textContent = pillText;
 
   // ── Layout ────────────────────────────────────────────────────────────────
   let fontPx = 0, rowH = 0, drumR = 0;
@@ -231,8 +356,8 @@
 
     measure.style.fontSize = fontPx + "px";
     const maxW = w * 0.9;
-    fit = items.map(t => {
-      measure.textContent = t;
+    fit = items.map(it => {
+      measure.textContent = it.name;
       return Math.min(1, maxW / measure.getBoundingClientRect().width);
     });
 
@@ -260,6 +385,7 @@
     for (let i = 0; i <= CURVE_N; i++) curve[i] /= acc;
   })();
   function curveAt(u) {
+    if (u <= 0) return 0;   // rAF's timestamp can be a hair before the spin's start time
     if (u >= 1) return 1;
     const x = u * CURVE_N, i = Math.floor(x);
     return curve[i] + (curve[i + 1] - curve[i]) * (x - i);
@@ -271,9 +397,23 @@
     if (preset >= 0 && preset < n) { const t = preset; preset = -1; return t; }
     preset = -1;
     if (n === 1) return 0;
-    let t;
-    do { t = Math.floor(Math.random() * n); } while (t === lastResult);
-    return t;
+
+    const weights = items.map(it => Math.max(0, Number(it.weight) || 0));
+    const total = weights.reduce((a, b) => a + b, 0);
+    if (total <= 0) return Math.floor(Math.random() * n);    // all zero → plain random
+
+    // Equal odds: truly random but never the same result twice in a row.
+    // Custom odds: honour them exactly (100% must always win).
+    const equal = weights.every(w => Math.abs(w - weights[0]) < 0.01);
+    if (equal && lastResult >= 0 && lastResult < n) weights[lastResult] = 0;
+
+    const sum = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * sum;
+    for (let i = 0; i < n; i++) {
+      r -= weights[i];
+      if (r < 0) return i;
+    }
+    return weights.findLastIndex(w => w > 0);
   }
 
   function startSpin() {
@@ -287,6 +427,7 @@
     pos = p0;
     lastCenter = p0;
     mode = "spin";
+    document.body.classList.remove("mouse");
     landT = 0;
     pill.classList.remove("show");
     confetti.length = 0;
@@ -320,7 +461,7 @@
       const d = r.k - frac;            // distance from center, in rows
       const ad = Math.abs(d);
       const item = mod(idx, n);
-      const text = items[item];
+      const text = items[item].name;
       if (r.text !== text) { r.el.textContent = text; r.text = text; }
 
       const theta = d * DRUM_STEP;
@@ -521,44 +662,162 @@
     tone(t + 0.01, "sine", 1568, 1568, 0.7, 0.07, 0.004);
   }
 
-  // ── List editor ───────────────────────────────────────────────────────────
+  // ── Items ─────────────────────────────────────────────────────────────────
+  function withEqualOdds(names) {
+    const w = Math.round(1000 / names.length) / 10;
+    return names.map(name => ({ name, weight: w }));
+  }
+
   function loadItems() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-      if (Array.isArray(saved) && saved.length) return saved;
+      if (saved && Array.isArray(saved.items) && saved.items.length) return saved.items;
+      const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY));   // old plain-string list
+      if (Array.isArray(legacy) && legacy.length) return withEqualOdds(legacy);
     } catch (e) {}
-    return ITEMS.slice();
+    return withEqualOdds(ITEMS);
   }
 
-  function openEditor() {
-    editorText.value = items.join("\n");
-    editor.classList.add("open");
-    setTimeout(() => editorText.focus(), 0);
+  function loadPillText() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (saved && typeof saved.pillText === "string" && saved.pillText.trim()) return saved.pillText;
+    } catch (e) {}
+    return PILL_TEXT;
   }
-  function closeEditor() {
-    editor.classList.remove("open");
+
+  function saveItems() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ items, pillText })); } catch (e) {}
   }
-  function saveEditor() {
-    const next = editorText.value.split("\n").map(s => s.trim().toUpperCase()).filter(Boolean);
+
+  // ── Settings panel ────────────────────────────────────────────────────────
+  let draft = [];
+
+  function chanceOf(i) {
+    const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
+    if (total <= 0) return 100 / draft.length;
+    return Math.max(0, Number(draft[i].weight) || 0) / total * 100;
+  }
+
+  function refreshChances() {
+    setItems.querySelectorAll(".item").forEach((row, i) => {
+      const c = chanceOf(i);
+      const el = row.querySelector(".chance");
+      el.textContent = (c >= 99.95 ? "100" : c === 0 ? "0" : c.toFixed(c < 10 ? 1 : 0)) + "%";
+      el.classList.toggle("hot", c >= 99.95);
+      el.classList.toggle("zero", c === 0);
+      row.classList.toggle("rigged", c >= 99.95 && draft.length > 1);
+    });
+
+    const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
+    const t = Math.abs(total - 100) <= 0.5 ? 100 : Math.round(total * 10) / 10;  // 9 × 11.1 reads as 100
+    const totalEl = document.getElementById("setTotal");
+    const off = Math.abs(t - 100) > 0.5;
+    totalEl.classList.toggle("off", off);
+    totalEl.innerHTML = `Total <b>${t}%</b>` + (off ? (t > 0 ? " · scaled to 100%" : " · all equal") : "");
+  }
+
+  function renderSettings() {
+    setItems.innerHTML = "";
+    draft.forEach((it, i) => {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <span class="num">${i + 1}</span>
+        <input type="text" class="name" spellcheck="false" maxlength="40">
+        <label class="pct"><input type="number" class="weight" min="0" max="100" step="1"></label>
+        <span class="chance"></span>
+        <button class="icon rig" title="Always land here (100%)">◎</button>
+        <button class="icon del" title="Remove">✕</button>`;
+      const name = row.querySelector(".name");
+      const weight = row.querySelector(".weight");
+      name.value = it.name;
+      weight.value = it.weight;
+      name.addEventListener("input", () => { it.name = name.value; });
+      weight.addEventListener("input", () => { it.weight = weight.value; refreshChances(); });
+      row.querySelector(".rig").addEventListener("click", () => {
+        draft.forEach((d, j) => { d.weight = j === i ? 100 : 0; });
+        renderSettings();
+      });
+      row.querySelector(".del").addEventListener("click", () => {
+        if (draft.length <= 1) return;
+        const keepEqual = draftIsEqual();
+        draft.splice(i, 1);
+        if (keepEqual) equalizeDraft();
+        renderSettings();
+      });
+      setItems.appendChild(row);
+    });
+    refreshChances();
+  }
+
+  function draftIsEqual() {
+    return draft.every(it => Math.abs((Number(it.weight) || 0) - (Number(draft[0].weight) || 0)) < 0.01);
+  }
+
+  function equalizeDraft() {
+    const w = Math.round(1000 / draft.length) / 10;
+    draft.forEach(it => { it.weight = w; });
+  }
+
+  function addDraftItem() {
+    const keepEqual = draftIsEqual();
+    draft.push({ name: "", weight: 0 });
+    if (keepEqual) equalizeDraft();
+    renderSettings();
+    const inputs = setItems.querySelectorAll(".name");
+    inputs[inputs.length - 1].focus();
+  }
+
+  function openSettings() {
+    draft = items.map(it => ({ ...it }));
+    document.getElementById("setPill").value = pillText;
+    renderSettings();
+    settings.classList.add("open");
+  }
+
+  function closeSettings() {
+    settings.classList.remove("open");
+    if (settings.contains(document.activeElement)) document.activeElement.blur();
+  }
+
+  function saveSettings() {
+    const next = draft
+      .map(it => ({
+        name: String(it.name).trim().toUpperCase(),
+        weight: Math.min(100, Math.max(0, Number(it.weight) || 0)),
+      }))
+      .filter(it => it.name);
+    pillText = document.getElementById("setPill").value.trim().toUpperCase() || PILL_TEXT;
+    pill.textContent = pillText;
     if (next.length) {
       items = next;
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(items)); } catch (e) {}
+      saveItems();
       lastResult = -1;
       preset = -1;
       reset();
       layout();
     }
-    closeEditor();
+    closeSettings();
   }
-  document.getElementById("editorSave").addEventListener("click", e => { e.stopPropagation(); saveEditor(); });
-  document.getElementById("editorCancel").addEventListener("click", e => { e.stopPropagation(); closeEditor(); });
-  editor.addEventListener("click", e => { e.stopPropagation(); if (e.target === editor) closeEditor(); });
+
+  document.getElementById("setDefaults").addEventListener("click", () => {
+    draft = withEqualOdds(ITEMS);
+    document.getElementById("setPill").value = PILL_TEXT;
+    renderSettings();
+  });
+  document.getElementById("setAdd").addEventListener("click", addDraftItem);
+  document.getElementById("setEqual").addEventListener("click", () => { equalizeDraft(); renderSettings(); });
+  document.getElementById("setSave").addEventListener("click", saveSettings);
+  document.getElementById("setCancel").addEventListener("click", closeSettings);
+  document.getElementById("setClose").addEventListener("click", closeSettings);
+  settings.addEventListener("click", e => { e.stopPropagation(); if (e.target === settings) closeSettings(); });
 
   // ── Input ─────────────────────────────────────────────────────────────────
   addEventListener("keydown", e => {
-    if (editor.classList.contains("open")) {
-      if (e.key === "Escape") { e.preventDefault(); closeEditor(); }
-      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveEditor(); }
+    if (settings.classList.contains("open")) {
+      if (e.key === "Escape") { e.preventDefault(); closeSettings(); }
+      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveSettings(); }
       return;
     }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -577,10 +836,24 @@
         break;
       case "g": document.body.classList.toggle("green"); break;
       case "m": soundOn = !soundOn; break;
-      case "e": e.preventDefault(); if (mode !== "spin" && mode !== "bounce") openEditor(); break;
+      case "e": e.preventDefault(); if (mode !== "spin" && mode !== "bounce") openSettings(); break;
     }
   });
   addEventListener("click", () => startSpin());
+
+  // Reveal the cursor + gear on mouse move; hide again after 2s still
+  let mouseTimer = 0;
+  addEventListener("mousemove", () => {
+    if (mode === "spin" || mode === "bounce") return;
+    document.body.classList.add("mouse");
+    clearTimeout(mouseTimer);
+    mouseTimer = setTimeout(() => document.body.classList.remove("mouse"), 2000);
+  });
+  document.getElementById("gear").addEventListener("click", e => {
+    e.stopPropagation();
+    document.body.classList.remove("mouse");
+    openSettings();
+  });
   addEventListener("resize", () => { layout(); sizeCanvas(); });
 
   // ── Boot ──────────────────────────────────────────────────────────────────
