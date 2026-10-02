@@ -764,6 +764,7 @@
 
   function closeSettings() {
     settings.classList.remove("open");
+    if (settings.contains(document.activeElement)) document.activeElement.blur();
   }
 
   function saveSettings() {
