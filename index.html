@@ -237,7 +237,7 @@
       </section>
     </div>
     <footer>
-      <span class="spacer"></span>
+      <button class="spacer" id="setDefaults" title="Back to the built-in list with equal odds">Reset to defaults</button>
       <button id="setCancel">Cancel</button>
       <button class="primary" id="setSave">Save</button>
     </footer>
@@ -745,6 +745,11 @@
     closeSettings();
   }
 
+  document.getElementById("setDefaults").addEventListener("click", () => {
+    draft = withEqualOdds(ITEMS);
+    document.getElementById("setPill").value = PILL_TEXT;
+    renderSettings();
+  });
   document.getElementById("setAdd").addEventListener("click", addDraftItem);
   document.getElementById("setEqual").addEventListener("click", () => { equalizeDraft(); renderSettings(); });
   document.getElementById("setSave").addEventListener("click", saveSettings);
