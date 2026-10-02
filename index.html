@@ -186,10 +186,11 @@
   const DRUM_STEP = 21;      // degrees between rows on the drum
   const SLOTS = 4;           // rows rendered above/below center
 
-  const STORE_KEY = "side-hustle-reel:list";
+  const STORE_KEY = "side-hustle-spinner:settings";
+  const LEGACY_KEY = "side-hustle-reel:list";
 
   // ── State ─────────────────────────────────────────────────────────────────
-  let items = loadItems();
+  let items = loadItems();   // [{ name, weight }] — weight is a % chance
   let pos = 0;               // continuous reel position, in rows
   let mode = "idle";         // idle | spin | bounce | landed
   let spin = null;           // { start, p0, dist }
@@ -231,8 +232,8 @@
 
     measure.style.fontSize = fontPx + "px";
     const maxW = w * 0.9;
-    fit = items.map(t => {
-      measure.textContent = t;
+    fit = items.map(it => {
+      measure.textContent = it.name;
       return Math.min(1, maxW / measure.getBoundingClientRect().width);
     });
 
@@ -320,7 +321,7 @@
       const d = r.k - frac;            // distance from center, in rows
       const ad = Math.abs(d);
       const item = mod(idx, n);
-      const text = items[item];
+      const text = items[item].name;
       if (r.text !== text) { r.el.textContent = text; r.text = text; }
 
       const theta = d * DRUM_STEP;
@@ -521,17 +522,30 @@
     tone(t + 0.01, "sine", 1568, 1568, 0.7, 0.07, 0.004);
   }
 
-  // ── List editor ───────────────────────────────────────────────────────────
+  // ── Items ─────────────────────────────────────────────────────────────────
+  function withEqualOdds(names) {
+    const w = Math.round(1000 / names.length) / 10;
+    return names.map(name => ({ name, weight: w }));
+  }
+
   function loadItems() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-      if (Array.isArray(saved) && saved.length) return saved;
+      if (saved && Array.isArray(saved.items) && saved.items.length) return saved.items;
+      const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY));   // old plain-string list
+      if (Array.isArray(legacy) && legacy.length) return withEqualOdds(legacy);
     } catch (e) {}
-    return ITEMS.slice();
+    return withEqualOdds(ITEMS);
   }
 
+  function saveItems() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ items })); } catch (e) {}
+  }
+
+  // ── List editor ───────────────────────────────────────────────────────────
+
   function openEditor() {
-    editorText.value = items.join("\n");
+    editorText.value = items.map(it => it.name).join("\n");
     editor.classList.add("open");
     setTimeout(() => editorText.focus(), 0);
   }
@@ -541,8 +555,8 @@
   function saveEditor() {
     const next = editorText.value.split("\n").map(s => s.trim().toUpperCase()).filter(Boolean);
     if (next.length) {
-      items = next;
-      try { localStorage.setItem(STORE_KEY, JSON.stringify(items)); } catch (e) {}
+      items = withEqualOdds(next);
+      saveItems();
       lastResult = -1;
       preset = -1;
       reset();
