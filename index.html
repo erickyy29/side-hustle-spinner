@@ -160,6 +160,9 @@
   #settings button.primary:hover { background: #ff4545; }
   #settings button.icon { padding: 0; width: 30px; height: 30px; font-size: 15px; letter-spacing: 0; }
   #settings .tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  #settings .total { margin-left: auto; font-size: 11px; color: #888; font-variant-numeric: tabular-nums; }
+  #settings .total b { color: #fff; }
+  #settings .total.off b { color: #ffb020; }
   #settings button.del { background: transparent; color: #555; }
   #settings button.del:hover { background: rgba(255, 42, 42, .14); color: var(--red); }
   #settings footer {
@@ -220,6 +223,8 @@
         <div id="setItems"></div>
         <div class="tools">
           <button id="setAdd">+ Add item</button>
+          <button id="setEqual" title="Give every item the same chance">Equal odds</button>
+          <span class="total" id="setTotal"></span>
         </div>
       </section>
     </div>
@@ -630,6 +635,13 @@
       el.classList.toggle("hot", c >= 99.95);
       el.classList.toggle("zero", c === 0);
     });
+
+    const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
+    const t = Math.round(total * 10) / 10;
+    const totalEl = document.getElementById("setTotal");
+    const off = Math.abs(t - 100) > 0.5;
+    totalEl.classList.toggle("off", off);
+    totalEl.innerHTML = `Total <b>${t}%</b>` + (off ? (t > 0 ? " · scaled to 100%" : " · all equal") : "");
   }
 
   function renderSettings() {
@@ -708,6 +720,7 @@
   }
 
   document.getElementById("setAdd").addEventListener("click", addDraftItem);
+  document.getElementById("setEqual").addEventListener("click", () => { equalizeDraft(); renderSettings(); });
   document.getElementById("setSave").addEventListener("click", saveSettings);
   document.getElementById("setCancel").addEventListener("click", closeSettings);
   document.getElementById("setClose").addEventListener("click", closeSettings);
