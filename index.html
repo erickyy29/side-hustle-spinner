@@ -91,6 +91,23 @@
   }
   #pill.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
 
+  /* Gear: only shows while the mouse is moving, so it never ends up on camera */
+  #gear {
+    position: fixed; top: 16px; right: 16px; z-index: 15;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(255, 255, 255, .08); color: #fff;
+    border: 1px solid rgba(255, 255, 255, .12);
+    backdrop-filter: blur(8px);
+    font-size: 20px; line-height: 1;
+    cursor: pointer;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease, background .15s;
+  }
+  #gear:hover { background: rgba(255, 42, 42, .35); }
+  body.mouse #gear { opacity: 1; pointer-events: auto; }
+  body.mouse { cursor: default; }
+
   /* Settings panel (E) */
   #settings {
     position: fixed; inset: 0;
@@ -210,6 +227,8 @@
     <feGaussianBlur id="mblurStd" stdDeviation="0 0" />
   </filter>
 </svg>
+
+<button id="gear" title="Settings (E)" aria-label="Settings">⚙</button>
 
 <div id="settings" role="dialog" aria-label="Settings">
   <div class="panel">
@@ -373,6 +392,7 @@
     pos = p0;
     lastCenter = p0;
     mode = "spin";
+    document.body.classList.remove("mouse");
     landT = 0;
     pill.classList.remove("show");
     confetti.length = 0;
@@ -784,6 +804,20 @@
     }
   });
   addEventListener("click", () => startSpin());
+
+  // Reveal the cursor + gear on mouse move; hide again after 2s still
+  let mouseTimer = 0;
+  addEventListener("mousemove", () => {
+    if (mode === "spin" || mode === "bounce") return;
+    document.body.classList.add("mouse");
+    clearTimeout(mouseTimer);
+    mouseTimer = setTimeout(() => document.body.classList.remove("mouse"), 2000);
+  });
+  document.getElementById("gear").addEventListener("click", e => {
+    e.stopPropagation();
+    document.body.classList.remove("mouse");
+    openSettings();
+  });
   addEventListener("resize", () => { layout(); sizeCanvas(); });
 
   // ── Boot ──────────────────────────────────────────────────────────────────
