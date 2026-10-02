@@ -231,6 +231,10 @@
           <span class="total" id="setTotal"></span>
         </div>
       </section>
+      <section>
+        <h3>Label under the winner</h3>
+        <input type="text" id="setPill" spellcheck="false" maxlength="40">
+      </section>
     </div>
     <footer>
       <span class="spacer"></span>
@@ -257,6 +261,7 @@
 
   // ── State ─────────────────────────────────────────────────────────────────
   let items = loadItems();   // [{ name, weight }] — weight is a % chance
+  let pillText = loadPillText();
   let pos = 0;               // continuous reel position, in rows
   let mode = "idle";         // idle | spin | bounce | landed
   let spin = null;           // { start, p0, dist }
@@ -274,7 +279,7 @@
   const measure = document.getElementById("measure");
   const settings = document.getElementById("settings");
   const setItems = document.getElementById("setItems");
-  pill.textContent = PILL_TEXT;
+  pill.textContent = pillText;
 
   // ── Layout ────────────────────────────────────────────────────────────────
   let fontPx = 0, rowH = 0, drumR = 0;
@@ -618,8 +623,16 @@
     return withEqualOdds(ITEMS);
   }
 
+  function loadPillText() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+      if (saved && typeof saved.pillText === "string" && saved.pillText.trim()) return saved.pillText;
+    } catch (e) {}
+    return PILL_TEXT;
+  }
+
   function saveItems() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ items })); } catch (e) {}
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ items, pillText })); } catch (e) {}
   }
 
   // ── Settings panel ────────────────────────────────────────────────────────
@@ -703,6 +716,7 @@
 
   function openSettings() {
     draft = items.map(it => ({ ...it }));
+    document.getElementById("setPill").value = pillText;
     renderSettings();
     settings.classList.add("open");
   }
@@ -718,6 +732,8 @@
         weight: Math.min(100, Math.max(0, Number(it.weight) || 0)),
       }))
       .filter(it => it.name);
+    pillText = document.getElementById("setPill").value.trim().toUpperCase() || PILL_TEXT;
+    pill.textContent = pillText;
     if (next.length) {
       items = next;
       saveItems();
