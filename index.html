@@ -371,6 +371,7 @@
     for (let i = 0; i <= CURVE_N; i++) curve[i] /= acc;
   })();
   function curveAt(u) {
+    if (u <= 0) return 0;   // rAF's timestamp can be a hair before the spin's start time
     if (u >= 1) return 1;
     const x = u * CURVE_N, i = Math.floor(x);
     return curve[i] + (curve[i + 1] - curve[i]) * (x - i);
