@@ -689,14 +689,14 @@
     setItems.querySelectorAll(".item").forEach((row, i) => {
       const c = chanceOf(i);
       const el = row.querySelector(".chance");
-      el.textContent = (c >= 99.95 ? "100" : c.toFixed(c < 10 ? 1 : 0)) + "%";
+      el.textContent = (c >= 99.95 ? "100" : c === 0 ? "0" : c.toFixed(c < 10 ? 1 : 0)) + "%";
       el.classList.toggle("hot", c >= 99.95);
       el.classList.toggle("zero", c === 0);
       row.classList.toggle("rigged", c >= 99.95 && draft.length > 1);
     });
 
     const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
-    const t = Math.round(total * 10) / 10;
+    const t = Math.abs(total - 100) <= 0.5 ? 100 : Math.round(total * 10) / 10;  // 9 × 11.1 reads as 100
     const totalEl = document.getElementById("setTotal");
     const off = Math.abs(t - 100) > 0.5;
     totalEl.classList.toggle("off", off);
