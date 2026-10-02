@@ -91,42 +91,6 @@
   }
   #pill.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
 
-  /* List editor (E) */
-  #editor {
-    position: fixed; inset: 0;
-    display: none; align-items: center; justify-content: center;
-    background: rgba(0, 0, 0, .7);
-    cursor: auto;
-    z-index: 10;
-  }
-  #editor.open { display: flex; }
-  #editor .box {
-    width: min(420px, calc(100vw - 32px));
-    background: #161616;
-    border: 1px solid #2a2a2a;
-    border-radius: 14px;
-    padding: 18px;
-    color: #ddd;
-    font: 600 13px/1.4 "Montserrat", system-ui, sans-serif;
-    user-select: text;
-  }
-  #editor textarea {
-    width: 100%; height: 280px; margin: 10px 0 12px;
-    background: #0d0d0d; color: #fff;
-    border: 1px solid #333; border-radius: 8px;
-    padding: 10px; resize: vertical;
-    font: 800 14px/1.6 "Montserrat", system-ui, sans-serif;
-    text-transform: uppercase; letter-spacing: .04em;
-  }
-  #editor .actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
-  #editor .hint { margin-right: auto; color: #777; font-size: 11px; }
-  #editor button {
-    font: 800 12px "Montserrat", sans-serif; letter-spacing: .06em;
-    padding: 8px 14px; border-radius: 999px; border: 0; cursor: pointer;
-  }
-  #editor .save { background: var(--red); color: #fff; }
-  #editor .cancel { background: #2a2a2a; color: #ccc; }
-
   /* Settings panel (E) */
   #settings {
     position: fixed; inset: 0;
@@ -237,18 +201,6 @@
   </filter>
 </svg>
 
-<div id="editor">
-  <div class="box">
-    <div>Edit list — one item per line</div>
-    <textarea id="editorText" spellcheck="false"></textarea>
-    <div class="actions">
-      <span class="hint">⌘/Ctrl+Enter save · Esc cancel</span>
-      <button class="cancel" id="editorCancel">Cancel</button>
-      <button class="save" id="editorSave">Save</button>
-    </div>
-  </div>
-</div>
-
 <div id="settings" role="dialog" aria-label="Settings">
   <div class="panel">
     <header>
@@ -305,8 +257,8 @@
   const pill = document.getElementById("pill");
   const blurStd = document.getElementById("mblurStd");
   const measure = document.getElementById("measure");
-  const editor = document.getElementById("editor");
-  const editorText = document.getElementById("editorText");
+  const settings = document.getElementById("settings");
+  const setItems = document.getElementById("setItems");
   pill.textContent = PILL_TEXT;
 
   // ── Layout ────────────────────────────────────────────────────────────────
@@ -655,37 +607,85 @@
     try { localStorage.setItem(STORE_KEY, JSON.stringify({ items })); } catch (e) {}
   }
 
-  // ── List editor ───────────────────────────────────────────────────────────
+  // ── Settings panel ────────────────────────────────────────────────────────
+  let draft = [];
 
-  function openEditor() {
-    editorText.value = items.map(it => it.name).join("\n");
-    editor.classList.add("open");
-    setTimeout(() => editorText.focus(), 0);
+  function chanceOf(i) {
+    const total = draft.reduce((a, it) => a + Math.max(0, Number(it.weight) || 0), 0);
+    if (total <= 0) return 100 / draft.length;
+    return Math.max(0, Number(draft[i].weight) || 0) / total * 100;
   }
-  function closeEditor() {
-    editor.classList.remove("open");
+
+  function refreshChances() {
+    setItems.querySelectorAll(".item").forEach((row, i) => {
+      const c = chanceOf(i);
+      const el = row.querySelector(".chance");
+      el.textContent = (c >= 99.95 ? "100" : c.toFixed(c < 10 ? 1 : 0)) + "%";
+      el.classList.toggle("hot", c >= 99.95);
+      el.classList.toggle("zero", c === 0);
+    });
   }
-  function saveEditor() {
-    const next = editorText.value.split("\n").map(s => s.trim().toUpperCase()).filter(Boolean);
+
+  function renderSettings() {
+    setItems.innerHTML = "";
+    draft.forEach((it, i) => {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <span class="num">${i + 1}</span>
+        <input type="text" class="name" spellcheck="false" maxlength="40">
+        <label class="pct"><input type="number" class="weight" min="0" max="100" step="1"></label>
+        <span class="chance"></span>
+        <span></span>`;
+      const name = row.querySelector(".name");
+      const weight = row.querySelector(".weight");
+      name.value = it.name;
+      weight.value = it.weight;
+      name.addEventListener("input", () => { it.name = name.value; });
+      weight.addEventListener("input", () => { it.weight = weight.value; refreshChances(); });
+      setItems.appendChild(row);
+    });
+    refreshChances();
+  }
+
+  function openSettings() {
+    draft = items.map(it => ({ ...it }));
+    renderSettings();
+    settings.classList.add("open");
+  }
+
+  function closeSettings() {
+    settings.classList.remove("open");
+  }
+
+  function saveSettings() {
+    const next = draft
+      .map(it => ({
+        name: String(it.name).trim().toUpperCase(),
+        weight: Math.min(100, Math.max(0, Number(it.weight) || 0)),
+      }))
+      .filter(it => it.name);
     if (next.length) {
-      items = withEqualOdds(next);
+      items = next;
       saveItems();
       lastResult = -1;
       preset = -1;
       reset();
       layout();
     }
-    closeEditor();
+    closeSettings();
   }
-  document.getElementById("editorSave").addEventListener("click", e => { e.stopPropagation(); saveEditor(); });
-  document.getElementById("editorCancel").addEventListener("click", e => { e.stopPropagation(); closeEditor(); });
-  editor.addEventListener("click", e => { e.stopPropagation(); if (e.target === editor) closeEditor(); });
+
+  document.getElementById("setSave").addEventListener("click", saveSettings);
+  document.getElementById("setCancel").addEventListener("click", closeSettings);
+  document.getElementById("setClose").addEventListener("click", closeSettings);
+  settings.addEventListener("click", e => { e.stopPropagation(); if (e.target === settings) closeSettings(); });
 
   // ── Input ─────────────────────────────────────────────────────────────────
   addEventListener("keydown", e => {
-    if (editor.classList.contains("open")) {
-      if (e.key === "Escape") { e.preventDefault(); closeEditor(); }
-      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveEditor(); }
+    if (settings.classList.contains("open")) {
+      if (e.key === "Escape") { e.preventDefault(); closeSettings(); }
+      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); saveSettings(); }
       return;
     }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
@@ -704,7 +704,7 @@
         break;
       case "g": document.body.classList.toggle("green"); break;
       case "m": soundOn = !soundOn; break;
-      case "e": e.preventDefault(); if (mode !== "spin" && mode !== "bounce") openEditor(); break;
+      case "e": e.preventDefault(); if (mode !== "spin" && mode !== "bounce") openSettings(); break;
     }
   });
   addEventListener("click", () => startSpin());
