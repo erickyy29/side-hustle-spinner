@@ -127,6 +127,81 @@
   #editor .save { background: var(--red); color: #fff; }
   #editor .cancel { background: #2a2a2a; color: #ccc; }
 
+  /* Settings panel (E) */
+  #settings {
+    position: fixed; inset: 0;
+    display: none; align-items: center; justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, .72);
+    backdrop-filter: blur(6px);
+    cursor: auto;
+    z-index: 20;
+  }
+  #settings.open { display: flex; }
+  #settings .panel {
+    width: min(600px, 100%);
+    max-height: calc(100vh - 32px);
+    display: flex; flex-direction: column;
+    background: #121212;
+    border: 1px solid #262626;
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 42, 42, .06);
+    color: #ddd;
+    font: 600 13px/1.4 "Montserrat", system-ui, sans-serif;
+    user-select: text;
+    overflow: hidden;
+  }
+  #settings header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #1f1f1f;
+  }
+  #settings h2 { font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #fff; }
+  #settings .sub { color: #777; font-size: 11px; font-weight: 600; margin-top: 2px; letter-spacing: 0; text-transform: none; }
+  #settings .body { padding: 14px 20px; overflow-y: auto; }
+  #settings section + section { margin-top: 18px; }
+  #settings h3 { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #888; margin-bottom: 8px; }
+  #settings .cols, #settings .item {
+    display: grid; grid-template-columns: 22px 1fr 84px 52px 30px; gap: 8px; align-items: center;
+  }
+  #settings .cols { color: #666; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 0 2px 6px; }
+  #settings .item { padding: 4px 2px; border-radius: 10px; }
+  #settings .item:hover { background: #181818; }
+  #settings .num { color: #555; font-size: 11px; text-align: right; }
+  #settings input[type=text], #settings input[type=number] {
+    width: 100%; min-width: 0;
+    background: #0b0b0b; color: #fff;
+    border: 1px solid #2c2c2c; border-radius: 8px;
+    padding: 8px 10px;
+    font: 800 13px "Montserrat", system-ui, sans-serif;
+    letter-spacing: .04em;
+    outline: none;
+  }
+  #settings input[type=text] { text-transform: uppercase; }
+  #settings input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(255, 42, 42, .18); }
+  #settings .pct { position: relative; }
+  #settings .pct input { padding-right: 22px; text-align: right; }
+  #settings .pct::after { content: "%"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: #666; font-size: 12px; }
+  #settings .chance { font-size: 11px; color: #999; text-align: right; font-variant-numeric: tabular-nums; }
+  #settings .chance.hot { color: var(--red); }
+  #settings .chance.zero { color: #444; }
+  #settings button {
+    font: 800 11px "Montserrat", sans-serif; letter-spacing: .08em; text-transform: uppercase;
+    padding: 9px 14px; border-radius: 999px; border: 0; cursor: pointer;
+    background: #232323; color: #ccc;
+    transition: background .15s, color .15s;
+  }
+  #settings button:hover { background: #2e2e2e; color: #fff; }
+  #settings button.primary { background: var(--red); color: #fff; box-shadow: 0 0 18px rgba(255, 42, 42, .35); }
+  #settings button.primary:hover { background: #ff4545; }
+  #settings button.icon { padding: 0; width: 30px; height: 30px; font-size: 15px; letter-spacing: 0; }
+  #settings footer {
+    display: flex; gap: 8px; align-items: center; justify-content: flex-end;
+    padding: 14px 20px;
+    border-top: 1px solid #1f1f1f;
+  }
+  #settings footer .spacer { margin-right: auto; }
+
   #measure {
     position: absolute; visibility: hidden; white-space: nowrap;
     font-weight: 800; letter-spacing: .06em; text-transform: uppercase; line-height: 1;
@@ -171,6 +246,30 @@
       <button class="cancel" id="editorCancel">Cancel</button>
       <button class="save" id="editorSave">Save</button>
     </div>
+  </div>
+</div>
+
+<div id="settings" role="dialog" aria-label="Settings">
+  <div class="panel">
+    <header>
+      <div>
+        <h2>Settings</h2>
+        <div class="sub">Edit the names and the odds of landing on each one.</div>
+      </div>
+      <button class="icon" id="setClose" title="Close (Esc)">✕</button>
+    </header>
+    <div class="body">
+      <section>
+        <h3>Spinner items</h3>
+        <div class="cols"><span></span><span>Name</span><span>Odds</span><span>Chance</span><span></span></div>
+        <div id="setItems"></div>
+      </section>
+    </div>
+    <footer>
+      <span class="spacer"></span>
+      <button id="setCancel">Cancel</button>
+      <button class="primary" id="setSave">Save</button>
+    </footer>
   </div>
 </div>
 
